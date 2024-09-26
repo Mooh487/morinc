@@ -68,3 +68,20 @@
     (asserts! (<= price-per-core MAX-PRICE) (err u400))
     (ok (map-set compute-nodes { node-id: node-id } (merge node { available-cores: available-cores, price-per-core: price-per-core })))))
 
+;; Function to lease storage from a node
+(define-public (lease-storage (node-id uint) (space-to-rent uint) (lease-duration uint))
+  (let 
+    ((node (unwrap! (map-get? storage-nodes { node-id: node-id }) (err u404)))
+     (lease-id (var-get next-lease-id)))
+    (asserts! (<= space-to-rent (get available-space node)) (err u400))
+    (asserts! (<= lease-duration MAX-LEASE-DURATION) (err u400))
+    (map-set storage-leases 
+      { lease-id: lease-id }
+      { client: tx-sender, 
+        node-id: node-id, 
+        space-rented: space-to-rent, 
+        lease-start-block: block-height, 
+        lease-end-block: (+ block-height lease-duration), 
+        payment-amount: (* space-to-rent (get price-per-gb node)) })
+    (var-set next-lease-id (+ lease-id u1))
+    (ok lease-id)))
