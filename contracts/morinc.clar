@@ -113,3 +113,13 @@
     (asserts! (is-eq tx-sender (get client lease)) (err u403))
     (try! (stx-transfer? (get payment-amount lease) tx-sender (get owner node)))
     (ok (map-set storage-leases { lease-id: lease-id } (merge lease { payment-amount: u0 })))))
+
+
+;; Function to pay for a compute lease  
+(define-public (pay-compute-lease (lease-id uint))
+  (let 
+    ((lease (unwrap! (map-get? compute-leases { lease-id: lease-id }) (err u404)))
+     (node (unwrap! (map-get? compute-nodes { node-id: (get node-id lease) }) (err u404))))
+    (asserts! (is-eq tx-sender (get client lease)) (err u403))
+    (try! (stx-transfer? (get payment-amount lease) tx-sender (get owner node)))
+    (ok (map-set compute-leases { lease-id: lease-id } (merge lease { payment-amount: u0 })))))
