@@ -85,3 +85,21 @@
         payment-amount: (* space-to-rent (get price-per-gb node)) })
     (var-set next-lease-id (+ lease-id u1))
     (ok lease-id)))
+
+    ;; Function to lease compute resources from a node  
+(define-public (lease-compute (node-id uint) (cores-to-rent uint) (lease-duration uint))
+  (let 
+    ((node (unwrap! (map-get? compute-nodes { node-id: node-id }) (err u404)))
+     (lease-id (var-get next-lease-id)))
+    (asserts! (<= cores-to-rent (get available-cores node)) (err u400))
+    (asserts! (<= lease-duration MAX-LEASE-DURATION) (err u400))
+    (map-set compute-leases 
+      { lease-id: lease-id }
+      { client: tx-sender, 
+        node-id: node-id, 
+        cores-rented: cores-to-rent, 
+        lease-start-block: block-height, 
+        lease-end-block: (+ block-height lease-duration), 
+        payment-amount: (* cores-to-rent (get price-per-core node)) })
+    (var-set next-lease-id (+ lease-id u1))
+    (ok lease-id)))
