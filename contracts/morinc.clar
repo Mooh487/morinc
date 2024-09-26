@@ -103,3 +103,13 @@
         payment-amount: (* cores-to-rent (get price-per-core node)) })
     (var-set next-lease-id (+ lease-id u1))
     (ok lease-id)))
+
+
+    ;; Function to pay for a storage lease
+(define-public (pay-storage-lease (lease-id uint))
+  (let 
+    ((lease (unwrap! (map-get? storage-leases { lease-id: lease-id }) (err u404)))
+     (node (unwrap! (map-get? storage-nodes { node-id: (get node-id lease) }) (err u404))))
+    (asserts! (is-eq tx-sender (get client lease)) (err u403))
+    (try! (stx-transfer? (get payment-amount lease) tx-sender (get owner node)))
+    (ok (map-set storage-leases { lease-id: lease-id } (merge lease { payment-amount: u0 })))))
