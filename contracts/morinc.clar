@@ -59,3 +59,15 @@
     (map-set compute-nodes { node-id: node-id } { owner: tx-sender, available-cores: available-cores, price-per-core: price-per-core })
     (var-set next-node-id (+ node-id u1))
     (ok node-id)))
+
+
+;; Function to update an existing compute node
+(define-public (update-compute-node (node-id uint) (available-cores uint) (price-per-core uint))
+  (let 
+    ((node (unwrap! (map-get? compute-nodes { node-id: node-id }) (err u404))))
+    (asserts! (is-eq tx-sender (get owner node)) (err u403))
+    (asserts! (<= available-cores MAX-CORES) (err u400))
+    (asserts! (<= price-per-core MAX-PRICE) (err u400))
+    (ok (map-set compute-nodes { node-id: node-id } (merge node { available-cores: available-cores, price-per-core: price-per-core })))))
+
+
