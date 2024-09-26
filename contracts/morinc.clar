@@ -28,3 +28,13 @@
 (define-constant MAX-PRICE u1000000000) ;; 1000 STX
 (define-constant MAX-LEASE-DURATION u52560) ;; ~1 year in blocks
 
+
+;; Function to register a new storage node
+(define-public (register-storage-node (available-space uint) (price-per-gb uint))
+  (let 
+    ((node-id (var-get next-node-id)))
+    (asserts! (<= available-space MAX-SPACE) (err u400))
+    (asserts! (<= price-per-gb MAX-PRICE) (err u400))
+    (map-set storage-nodes { node-id: node-id } { owner: tx-sender, available-space: available-space, price-per-gb: price-per-gb })
+    (var-set next-node-id (+ node-id u1))
+    (ok node-id)))
