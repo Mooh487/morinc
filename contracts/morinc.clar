@@ -38,3 +38,14 @@
     (map-set storage-nodes { node-id: node-id } { owner: tx-sender, available-space: available-space, price-per-gb: price-per-gb })
     (var-set next-node-id (+ node-id u1))
     (ok node-id)))
+
+
+;; Function to update an existing storage node
+(define-public (update-storage-node (node-id uint) (available-space uint) (price-per-gb uint))
+  (let 
+    ((node (unwrap! (map-get? storage-nodes { node-id: node-id }) (err u404))))
+    (asserts! (is-eq tx-sender (get owner node)) (err u403))
+    (asserts! (<= available-space MAX-SPACE) (err u400))
+    (asserts! (<= price-per-gb MAX-PRICE) (err u400))
+    (ok (map-set storage-nodes { node-id: node-id } (merge node { available-space: available-space, price-per-gb: price-per-gb })))))
+
