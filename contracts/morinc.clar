@@ -123,3 +123,15 @@
     (asserts! (is-eq tx-sender (get client lease)) (err u403))
     (try! (stx-transfer? (get payment-amount lease) tx-sender (get owner node)))
     (ok (map-set compute-leases { lease-id: lease-id } (merge lease { payment-amount: u0 })))))
+
+
+;; Function to extend a storage lease
+(define-public (extend-storage-lease (lease-id uint) (new-duration uint))
+  (let 
+    ((lease (unwrap! (map-get? storage-leases { lease-id: lease-id }) (err u404))))
+    (asserts! (is-eq tx-sender (get client lease)) (err u403))
+    (asserts! (<= (+ (get lease-end-block lease) new-duration) (+ block-height MAX-LEASE-DURATION)) (err u400))
+    (ok (map-set storage-leases 
+         { lease-id: lease-id } 
+         (merge lease { lease-end-block: (+ (get lease-end-block lease) new-duration) })))))
+
