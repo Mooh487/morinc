@@ -49,3 +49,13 @@
     (asserts! (<= price-per-gb MAX-PRICE) (err u400))
     (ok (map-set storage-nodes { node-id: node-id } (merge node { available-space: available-space, price-per-gb: price-per-gb })))))
 
+
+;; Function to register a new compute node  
+(define-public (register-compute-node (available-cores uint) (price-per-core uint))
+  (let 
+    ((node-id (var-get next-node-id)))
+    (asserts! (<= available-cores MAX-CORES) (err u400))
+    (asserts! (<= price-per-core MAX-PRICE) (err u400))
+    (map-set compute-nodes { node-id: node-id } { owner: tx-sender, available-cores: available-cores, price-per-core: price-per-core })
+    (var-set next-node-id (+ node-id u1))
+    (ok node-id)))
