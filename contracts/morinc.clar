@@ -16,3 +16,7 @@
 (define-map compute-leases 
   { lease-id: uint }
   { client: principal, node-id: uint, cores-rented: uint, lease-start-block: uint, lease-end-block: uint, payment-amount: uint })
+
+  ;; Define counters for node IDs and lease IDs
+(define-data-var next-node-id uint u0)
+(define-data-var next-lease-id uint u0)
