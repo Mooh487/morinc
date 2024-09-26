@@ -7,8 +7,7 @@
   { node-id: uint }
   { owner: principal, available-cores: uint, price-per-core: uint })
 
-
-  ;; Define data structures for storage and compute leases
+;; Define data structures for storage and compute leases
 (define-map storage-leases 
   { lease-id: uint }
   { client: principal, node-id: uint, space-rented: uint, lease-start-block: uint, lease-end-block: uint, payment-amount: uint })
@@ -17,10 +16,9 @@
   { lease-id: uint }
   { client: principal, node-id: uint, cores-rented: uint, lease-start-block: uint, lease-end-block: uint, payment-amount: uint })
 
-  ;; Define counters for node IDs and lease IDs
+;; Define counters for node IDs and lease IDs
 (define-data-var next-node-id uint u0)
 (define-data-var next-lease-id uint u0)
-
 
 ;; Define constants for maximum values
 (define-constant MAX-SPACE u1000000000) ;; 1 TB in MB
@@ -28,7 +26,7 @@
 (define-constant MAX-PRICE u1000000000) ;; 1000 STX
 (define-constant MAX-LEASE-DURATION u52560) ;; ~1 year in blocks
 
-
+;; Functions for managing storage nodes
 ;; Function to register a new storage node
 (define-public (register-storage-node (available-space uint) (price-per-gb uint))
   (let 
@@ -38,7 +36,6 @@
     (map-set storage-nodes { node-id: node-id } { owner: tx-sender, available-space: available-space, price-per-gb: price-per-gb })
     (var-set next-node-id (+ node-id u1))
     (ok node-id)))
-
 
 ;; Function to update an existing storage node
 (define-public (update-storage-node (node-id uint) (available-space uint) (price-per-gb uint))
@@ -50,6 +47,7 @@
     (ok (map-set storage-nodes { node-id: node-id } (merge node { available-space: available-space, price-per-gb: price-per-gb })))))
 
 
+    ;; Functions for managing compute nodes
 ;; Function to register a new compute node  
 (define-public (register-compute-node (available-cores uint) (price-per-core uint))
   (let 
@@ -69,5 +67,4 @@
     (asserts! (<= available-cores MAX-CORES) (err u400))
     (asserts! (<= price-per-core MAX-PRICE) (err u400))
     (ok (map-set compute-nodes { node-id: node-id } (merge node { available-cores: available-cores, price-per-core: price-per-core })))))
-
 
